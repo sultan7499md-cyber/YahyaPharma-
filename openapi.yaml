@@ -1,0 +1,328 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Yahya Pharma API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: medicines
+    description: Medicine operations
+  - name: cart
+    description: Cart operations
+  - name: orders
+    description: Order operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /medicines:
+    get:
+      operationId: getMedicines
+      tags: [medicines]
+      summary: Get all medicines
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search term for medicine name or category
+        - name: category
+          in: query
+          schema:
+            type: string
+          description: Filter by category
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 30
+      responses:
+        "200":
+          description: List of medicines
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MedicineListResponse"
+
+  /medicines/{id}:
+    get:
+      operationId: getMedicineById
+      tags: [medicines]
+      summary: Get a medicine by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Medicine details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Medicine"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /categories:
+    get:
+      operationId: getCategories
+      tags: [medicines]
+      summary: Get all medicine categories
+      responses:
+        "200":
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+
+  /cart:
+    get:
+      operationId: getCart
+      tags: [cart]
+      summary: Get cart items
+      responses:
+        "200":
+          description: Cart contents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+    post:
+      operationId: addToCart
+      tags: [cart]
+      summary: Add item to cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CartItemRequest"
+      responses:
+        "200":
+          description: Updated cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+
+  /cart/{medicineId}:
+    delete:
+      operationId: removeFromCart
+      tags: [cart]
+      summary: Remove item from cart
+      parameters:
+        - name: medicineId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+    patch:
+      operationId: updateCartItem
+      tags: [cart]
+      summary: Update cart item quantity
+      parameters:
+        - name: medicineId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CartItemUpdateRequest"
+      responses:
+        "200":
+          description: Updated cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    Medicine:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        genericName:
+          type: string
+        category:
+          type: string
+        price:
+          type: number
+        mrp:
+          type: number
+        discount:
+          type: integer
+        manufacturer:
+          type: string
+        description:
+          type: string
+        dosage:
+          type: string
+        sideEffects:
+          type: string
+        inStock:
+          type: boolean
+        imageUrl:
+          type: string
+        requiresPrescription:
+          type: boolean
+      required:
+        - id
+        - name
+        - category
+        - price
+        - mrp
+        - discount
+        - manufacturer
+        - description
+        - inStock
+        - requiresPrescription
+
+    MedicineListResponse:
+      type: object
+      properties:
+        medicines:
+          type: array
+          items:
+            $ref: "#/components/schemas/Medicine"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+        - medicines
+        - total
+        - page
+        - limit
+        - totalPages
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        icon:
+          type: string
+        count:
+          type: integer
+      required:
+        - id
+        - name
+        - count
+
+    Cart:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CartItem"
+        subtotal:
+          type: number
+        total:
+          type: number
+        itemCount:
+          type: integer
+      required:
+        - items
+        - subtotal
+        - total
+        - itemCount
+
+    CartItem:
+      type: object
+      properties:
+        medicine:
+          $ref: "#/components/schemas/Medicine"
+        quantity:
+          type: integer
+        totalPrice:
+          type: number
+      required:
+        - medicine
+        - quantity
+        - totalPrice
+
+    CartItemRequest:
+      type: object
+      properties:
+        medicineId:
+          type: integer
+        quantity:
+          type: integer
+      required:
+        - medicineId
+        - quantity
+
+    CartItemUpdateRequest:
+      type: object
+      properties:
+        quantity:
+          type: integer
+      required:
+        - quantity

@@ -1,0 +1,14 @@
+packages:
+  "framer-motion": "For smooth page transitions and micro-interactions"
+  "qrcode.react": "To generate UPI payment QR codes in the cart"
+  "use-debounce": "To debounce search input before triggering API requests"
+
+images:
+  - path: "artifacts/yahya-pharma/public/images/logo.png"
+    description: "A premium, highly polished stylized letter 'Y' logo for a modern pharmacy called 'Yahya Pharma'. The 'Y' should be composed of smooth geometric shapes resembling a leaf or cross, in vibrant emerald green and deep forest green gradients, on a completely transparent background."
+    aspect_ratio: "1:1"
+
+notes:
+  - "Assuming Wouter is used for routing"
+  - "Assuming Shadcn UI components are pre-generated in src/components/ui"
+  - "React Query hooks are imported from @workspace/api-client-react"
